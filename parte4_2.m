@@ -1,4 +1,6 @@
-Tmz = 0.9; % Tiempo de muestreo
+Tmz = 2.2; % Tiempo de muestreo
+% Tmz = 1.1 % Punto 6
+% Tmz = 3.2 % Punto 7
 Tm2_zoh = Tmz/10;
 
 fprintf('\n---------Controlador PID (Predictor Smith) con la función de Retenedor de orden cero (zoh)----------- :\n');
@@ -38,7 +40,7 @@ Plant2 = connect(Pz2,Gppz2,Dppz2,Fzoh,S1,S2,'u','ym');
 % -----------------------------------------------------------------------------------
 % Design PID controller with 0.08 rad/s bandwidth and 90 degrees phase margin
 Options = pidtuneOptions('PhaseMargin',90);
-C2 = pidtune(Plant2,pidstd(11.37,0.0051,0.00000191,0.000001,Tm2_zoh),0.08,Options);
+C2 = pidtune(Plant2,pidstd(1,6,0,1,Tm2_zoh),5)
 C2.InputName = 'e';
 C2.OutputName = 'u';
 % -----------------------------------------------------------------------------------
@@ -48,9 +50,10 @@ Sum1 = sumblk('e = ysp - yp - dp');
 Sum2 = sumblk('y = y0 + d');
 Sum3 = sumblk('dy = y - y1');
 Tzoh = connect(Pz2,Gppz2,Dppz2,C2,Fzoh,Sum1,Sum2,Sum3,{'ysp','d'},'y');
-R2 = tf(Tzoh);
+R2 = tf(Tzoh)
 figure(1);impulse(R2,'b');
 figure(2);step(R2,'r')
+stepinfo(R2(1))
 
 % Entrada Escalon
 E2 = tf(1,[1 0]);
@@ -62,7 +65,7 @@ RE2 = tf(TE2z);
 
 % Entrada  Rampa
 U2 = tf(1,[1 0 0]);
-U2z = c2d(E2,Tm2_zoh,'zoh');
+U2z = c2d(U2,Tm2_zoh,'zoh');
 U2z.InputName = 'yr';
 U2z.OutputName = 'ysp';
 TU2z = connect(Pz2,Gppz2,Dppz2,C2,Fzoh,Sum1,Sum2,Sum3,U2z,{'yr'},'y');
